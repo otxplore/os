@@ -143,36 +143,71 @@ header h1 {margin:0;font-size:25px}
   margin-top:10px;
 }
 .actions button {flex:1}
+.phone-shell {max-width:430px;margin:0 auto}
+.phone-number-wrap {
+  display:flex;align-items:center;gap:8px;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:18px;padding:8px 12px;margin:16px 0 18px;
+}
 .dial-display {
-  font-size:30px;
-  text-align:center;
-  letter-spacing:2px;
-  margin:25px 0;
-  background:transparent;
-  border:0;
+  flex:1;min-width:0;font-size:30px;text-align:center;
+  letter-spacing:1.5px;margin:0;padding:13px 4px;
+  background:transparent;border:0;outline:none;
 }
-.dial-pad {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-  max-width:340px;
-  margin:auto;
+.dial-tool {
+  width:42px;height:42px;padding:0;border-radius:12px;
+  background:var(--card);font-size:18px;flex:0 0 auto;
 }
-.dial-pad button {
-  height:65px;
-  border-radius:50%;
-  font-size:23px;
-  background:var(--panel);
+.phone-dial-pad {
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:11px;max-width:340px;margin:0 auto;
 }
+.phone-dial-pad button {
+  height:68px;border-radius:19px;background:var(--panel);
+  border:1px solid var(--border);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;padding:5px;
+  font-size:25px;font-weight:600;
+}
+.phone-dial-pad button small {font-size:9px;letter-spacing:2px;color:var(--muted);font-weight:500}
+.phone-call-row {display:flex;justify-content:center;margin:18px auto 22px}
 .call-button {
-  display:block;
-  margin:20px auto;
-  width:75px;
-  height:75px;
-  border-radius:50%;
-  background:#1b9b62;
-  font-size:28px;
+  width:min(100%,220px);height:54px;border-radius:17px;
+  background:#159b62;color:white;font-size:17px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 6px 18px rgba(21,155,98,.2);
 }
+.phone-section {max-width:430px;margin:0 auto}
+.calc-wrap {max-width:430px;margin:0 auto}
+.calc-display-wrap {
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:20px;padding:18px 16px;margin:16px 0 14px;
+  min-height:112px;display:flex;flex-direction:column;justify-content:flex-end;
+}
+#calc-expression {min-height:20px;text-align:right;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+#calc-display {
+  width:100%;margin:7px 0 0;padding:0;border:0;background:transparent;
+  color:var(--text);font-size:34px;text-align:right;font-weight:600;
+  outline:none;box-shadow:none;
+}
+.calc-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.calc-grid button {
+  min-height:62px;border-radius:17px;background:var(--panel);
+  border:1px solid var(--border);font-size:21px;font-weight:600;
+}
+.calc-grid button.calc-utility {background:var(--card);color:var(--accent)}
+.calc-grid button.calc-operator {color:var(--accent);font-size:24px}
+.calc-grid button.calc-equals {background:var(--accent);color:#171717}
+.calc-grid button.calc-zero {grid-column:span 2}
+.camera-preview {
+  width:100%;max-height:58vh;aspect-ratio:3/4;object-fit:cover;
+  background:#05070d;border-radius:18px;display:block;
+}
+.camera-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.camera-actions button {min-height:48px}
+.camera-capture {background:var(--accent);color:#171717;font-weight:700}
+#camera-result {width:100%;border-radius:16px;margin-top:14px;display:none}
+@media(max-width:380px){.phone-dial-pad button{height:61px}.calc-grid{gap:7px}.calc-grid button{min-height:56px}}
+
 .list-item {
   background:var(--panel);
   border-radius:13px;
@@ -344,7 +379,6 @@ body.dimmed {
     &nbsp; | &nbsp;
     <span id="date">--/--/----</span>
   </span>
-  <span>● Wi-Fi &nbsp; ▰</span>
   <button id="notification-button"
           onclick="openNotifications()"
           aria-label="Open notifications"
@@ -365,28 +399,13 @@ body.dimmed {
   </div>
 
   <div class="quick-settings">
-    <button class="quick-tile active" id="wifi-tile"
-      onclick="toggleQuickSetting('wifi')">
-      <span>📶</span>
-      Wi-Fi
-    </button>
-
-    <button class="quick-tile" id="airplane-tile"
-      onclick="toggleQuickSetting('airplane')">
-      <span>✈️</span>
-      Airplane
-    </button>
-
-    <button class="quick-tile" id="dnd-tile"
-      onclick="toggleQuickSetting('dnd')">
+    <button class="quick-tile" id="dnd-tile" onclick="toggleDoNotDisturb()" aria-pressed="false">
       <span>🌙</span>
-      Do Not Disturb
+      Do Not Disturb: Off
     </button>
-
-    <button class="quick-tile active" id="theme-tile"
-      onclick="toggleTheme()">
+    <button class="quick-tile active" id="theme-tile" onclick="toggleTheme()" aria-pressed="true">
       <span>🌗</span>
-      Theme
+      Dark / Light Theme
     </button>
   </div>
 
@@ -405,10 +424,11 @@ body.dimmed {
 
   <div class="panel-footer">
     <span>OTX OS 1.2</span>
-    <span id="battery-level">Battery: --</span>
+    <span id="battery-level" hidden></span>
   </div>
 </div>
-
+<div id="notification-toast" role="status" aria-live="polite" style="position:fixed;left:16px;right:16px;bottom:24px;z-index:1101;padding:13px 16px;border:1px solid var(--border);border-radius:14px;background:var(--panel);color:var(--text);box-shadow:0 8px 28px rgba(0,0,0,.28);font-size:14px"></div>
+<style>#notification-toast{display:none}#notification-toast.show{display:block}#notification-toast strong{display:block;margin-bottom:4px}#notification-toast span{color:var(--muted)}</style>
 
 <header>
   <h1><span class="brand">OTX</span> OS</h1>
@@ -453,43 +473,49 @@ body.dimmed {
   </div>
 </main>
 
-<!-- PHONE -->
+<!-- PHONE / DIALER -->
 <section class="screen" id="phone">
   <div class="screen-header">
-    <button class="back" onclick="home()">←</button>
+    <button class="back" onclick="home()" aria-label="Back to home">←</button>
     <h2>Phone</h2>
   </div>
 
-  <input id="phone-number" class="dial-display"
-         type="tel" placeholder="Enter number">
+  <div class="phone-shell">
+    <div class="muted" style="text-align:center">Enter a number or choose a contact</div>
+    <div class="phone-number-wrap">
+      <input id="phone-number" class="dial-display" type="tel"
+             inputmode="tel" autocomplete="tel" placeholder="Enter number"
+             aria-label="Phone number">
+      <button class="dial-tool" onclick="dialBackspace()" aria-label="Delete last digit" title="Delete">⌫</button>
+      <button class="dial-tool" onclick="dialClear()" aria-label="Clear number" title="Clear">✕</button>
+    </div>
 
-  <div class="dial-pad">
-    <button onclick="dialAdd('1')">1</button>
-    <button onclick="dialAdd('2')">2</button>
-    <button onclick="dialAdd('3')">3</button>
-    <button onclick="dialAdd('4')">4</button>
-    <button onclick="dialAdd('5')">5</button>
-    <button onclick="dialAdd('6')">6</button>
-    <button onclick="dialAdd('7')">7</button>
-    <button onclick="dialAdd('8')">8</button>
-    <button onclick="dialAdd('9')">9</button>
-    <button onclick="dialAdd('*')">*</button>
-    <button onclick="dialAdd('0')">0</button>
-    <button onclick="dialAdd('#')">#</button>
+    <div class="phone-dial-pad">
+      <button onclick="dialAdd('1')">1<small></small></button>
+      <button onclick="dialAdd('2')">2<small>ABC</small></button>
+      <button onclick="dialAdd('3')">3<small>DEF</small></button>
+      <button onclick="dialAdd('4')">4<small>GHI</small></button>
+      <button onclick="dialAdd('5')">5<small>JKL</small></button>
+      <button onclick="dialAdd('6')">6<small>MNO</small></button>
+      <button onclick="dialAdd('7')">7<small>PQRS</small></button>
+      <button onclick="dialAdd('8')">8<small>TUV</small></button>
+      <button onclick="dialAdd('9')">9<small>WXYZ</small></button>
+      <button onclick="dialAdd('*')">*</button>
+      <button onclick="dialAdd('0')">0<small>+</small></button>
+      <button onclick="dialAdd('#')">#</button>
+    </div>
+
+    <div class="phone-call-row">
+      <button class="call-button" onclick="makeCall()"><span>📞</span> Call</button>
+    </div>
   </div>
 
-  <div class="actions" style="max-width:340px;margin:15px auto">
-    <button onclick="dialBackspace()">⌫ Delete</button>
-    <button onclick="dialClear()">Clear</button>
+  <div class="phone-section">
+    <div class="section-title">Speed Dial</div>
+    <div id="phone-speed-dial"></div>
+    <div class="section-title">Recent Calls</div>
+    <div id="phone-recent"></div>
   </div>
-
-  <button class="call-button" onclick="makeCall()">📞</button>
-
-  <div class="section-title">Speed Dial</div>
-  <div id="phone-speed-dial"></div>
-
-  <div class="section-title">Recent Calls</div>
-  <div id="phone-recent"></div>
 </section>
 
 <!-- CONTACTS -->
@@ -555,29 +581,39 @@ body.dimmed {
 <!-- CALCULATOR -->
 <section class="screen" id="calculator">
   <div class="screen-header">
-    <button class="back" onclick="home()">←</button>
+    <button class="back" onclick="home()" aria-label="Back to home">←</button>
     <h2>Calculator</h2>
   </div>
-  <input id="calc-display" placeholder="0" readonly style="font-size:27px;text-align:right">
-  <div class="dial-pad">
-    <button onclick="calcAdd('7')">7</button>
-    <button onclick="calcAdd('8')">8</button>
-    <button onclick="calcAdd('9')">9</button>
-    <button onclick="calcAdd('4')">4</button>
-    <button onclick="calcAdd('5')">5</button>
-    <button onclick="calcAdd('6')">6</button>
-    <button onclick="calcAdd('1')">1</button>
-    <button onclick="calcAdd('2')">2</button>
-    <button onclick="calcAdd('3')">3</button>
-    <button onclick="calcAdd('0')">0</button>
-    <button onclick="calcAdd('.')">.</button>
-    <button onclick="calcAdd('+')">+</button>
-    <button onclick="calcAdd('-')">−</button>
-    <button onclick="calcAdd('*')">×</button>
-    <button onclick="calcAdd('/')">÷</button>
-    <button onclick="calcClear()">C</button>
-    <button onclick="calcBack()">⌫</button>
-    <button class="primary" onclick="calculate()">=</button>
+  <div class="calc-wrap">
+    <div class="calc-display-wrap">
+      <div id="calc-expression" aria-live="polite"></div>
+      <input id="calc-display" value="0" placeholder="0" readonly aria-label="Calculator display">
+    </div>
+    <div class="calc-grid">
+      <button class="calc-utility" onclick="calcClear()">AC</button>
+      <button class="calc-utility" onclick="calcBack()" aria-label="Backspace">⌫</button>
+      <button class="calc-utility" onclick="calcToggleSign()">±</button>
+      <button class="calc-operator" onclick="calcAdd('/')">÷</button>
+
+      <button onclick="calcAdd('7')">7</button>
+      <button onclick="calcAdd('8')">8</button>
+      <button onclick="calcAdd('9')">9</button>
+      <button class="calc-operator" onclick="calcAdd('*')">×</button>
+
+      <button onclick="calcAdd('4')">4</button>
+      <button onclick="calcAdd('5')">5</button>
+      <button onclick="calcAdd('6')">6</button>
+      <button class="calc-operator" onclick="calcAdd('-')">−</button>
+
+      <button onclick="calcAdd('1')">1</button>
+      <button onclick="calcAdd('2')">2</button>
+      <button onclick="calcAdd('3')">3</button>
+      <button class="calc-operator" onclick="calcAdd('+')">+</button>
+
+      <button class="calc-zero" onclick="calcAdd('0')">0</button>
+      <button onclick="calcAdd('.')">.</button>
+      <button class="calc-equals" onclick="calculate()">=</button>
+    </div>
   </div>
 </section>
 
@@ -634,12 +670,24 @@ body.dimmed {
 <!-- CAMERA -->
 <section class="screen" id="camera">
   <div class="screen-header">
-    <button class="back" onclick="home()">←</button>
+    <button class="back" onclick="home()" aria-label="Back to home">←</button>
     <h2>Camera</h2>
   </div>
   <div class="card">
-    <p>Open your device camera or select an image.</p>
-    <input type="file" accept="image/*" capture="environment">
+    <p class="muted">Use your device camera to take a photo, or choose an existing image.</p>
+    <video id="camera-video" class="camera-preview" autoplay playsinline muted style="display:none"></video>
+    <canvas id="camera-canvas" hidden></canvas>
+    <img id="camera-result" alt="Captured photo preview">
+    <div class="camera-actions">
+      <button class="primary" id="camera-start" onclick="startCamera()">📷 Start Camera</button>
+      <button onclick="switchCamera()" id="camera-switch" disabled>🔄 Switch Camera</button>
+      <button class="camera-capture" id="camera-capture" onclick="capturePhoto()" disabled>● Capture Photo</button>
+      <button onclick="stopCamera()" id="camera-stop" disabled>■ Stop Camera</button>
+    </div>
+    <div class="muted" id="camera-status" style="margin-top:12px">Camera is off. Allow camera access when prompted.</div>
+    <div class="section-title">Choose an image instead</div>
+    <input id="camera-file" type="file" accept="image/*" capture="environment" onchange="handleCameraFile(event)">
+    <button id="camera-download" class="primary full hidden" onclick="downloadCapturedPhoto()">⬇ Save Photo</button>
   </div>
 </section>
 
@@ -666,7 +714,7 @@ body.dimmed {
   </div>
   <div class="card">
     <h3>OTX OS</h3>
-    <p class="muted">Version 1.1 – Communication Suite</p>
+    <p class="muted">Version 1.3 – OTXS Web OS</p>
     <button class="full" onclick="toggleTheme()">Toggle Light / Dark Mode</button>
     <button class="full" onclick="installApp()">Install OTX OS</button>
   </div>
@@ -704,6 +752,7 @@ function getData(key) {
 }
 
 function openApp(id) {
+  if (id !== 'camera' && typeof stopCamera === 'function') stopCamera();
   document.getElementById('home').style.display = 'none';
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -720,6 +769,7 @@ function openApp(id) {
 }
 
 function home() {
+  if (typeof stopCamera === 'function') stopCamera();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('home').style.display = 'block';
 }
@@ -750,16 +800,21 @@ setInterval(updateClock, 1000);
 
 // PHONE / DIALER
 function dialAdd(value) {
-  document.getElementById('phone-number').value += value;
+  const input = document.getElementById('phone-number');
+  input.value += value;
+  input.focus();
 }
 
 function dialClear() {
-  document.getElementById('phone-number').value = '';
+  const input = document.getElementById('phone-number');
+  input.value = '';
+  input.focus();
 }
 
 function dialBackspace() {
   const input = document.getElementById('phone-number');
   input.value = input.value.slice(0, -1);
+  input.focus();
 }
 
 function makeCall(number) {
@@ -779,6 +834,7 @@ function makeCall(number) {
   });
 
   localStorage.setItem(STORAGE.calls, JSON.stringify(calls.slice(0, 100)));
+  addNotification('Outgoing call', 'Opening the phone app for ' + number);
   renderPhone();
   window.location.href = 'tel:' + number;
 }
@@ -846,6 +902,7 @@ function saveContact() {
   else contacts.push(contact);
 
   localStorage.setItem(STORAGE.contacts, JSON.stringify(contacts));
+  addNotification('Contacts', (id ? 'Updated ' : 'Added ') + name);
   hideContactForm();
   renderContacts();
   renderPhone();
@@ -1039,28 +1096,54 @@ function importContacts(event) {
 }
 
 // CALCULATOR
+let calcJustCalculated = false;
 function calcAdd(value) {
-  document.getElementById('calc-display').value += value;
+  const input = document.getElementById('calc-display');
+  const expression = document.getElementById('calc-expression');
+  if (input.value === 'Error' || input.value === 'Invalid') input.value = '0';
+  if (calcJustCalculated && /^[0-9.]$/.test(value)) input.value = value;
+  else if (calcJustCalculated) input.value += value;
+  else if (input.value === '0' && /^[0-9.]$/.test(value)) input.value = value;
+  else input.value += value;
+  calcJustCalculated = false;
+  expression.textContent = '';
 }
 function calcClear() {
-  document.getElementById('calc-display').value = '';
+  document.getElementById('calc-display').value = '0';
+  document.getElementById('calc-expression').textContent = '';
+  calcJustCalculated = false;
 }
 function calcBack() {
   const input = document.getElementById('calc-display');
-  input.value = input.value.slice(0,-1);
+  input.value = input.value.length > 1 ? input.value.slice(0, -1) : '0';
+  calcJustCalculated = false;
+}
+function calcToggleSign() {
+  const input = document.getElementById('calc-display');
+  if (!input.value || input.value === '0' || input.value === 'Error') return;
+  if (/^-?[0-9.]+$/.test(input.value)) {
+    input.value = input.value.startsWith('-') ? input.value.slice(1) : '-' + input.value;
+  } else {
+    input.value = '(' + input.value + ')*-1';
+  }
+  calcJustCalculated = false;
 }
 function calculate() {
   const input = document.getElementById('calc-display');
+  const expressionLine = document.getElementById('calc-expression');
   const expression = input.value;
 
-  if (!/^[0-9+\-*/().\s]+$/.test(expression)) {
+  if (!/^[0-9+\-*/%.()\s]+$/.test(expression)) {
     input.value = 'Invalid';
     return;
   }
 
   try {
     const result = Function('"use strict"; return (' + expression + ')')();
-    input.value = Number.isFinite(result) ? String(result) : 'Error';
+    if (!Number.isFinite(result)) throw new Error('Math error');
+    expressionLine.textContent = expression + ' =';
+    input.value = String(Number(result.toPrecision(12)));
+    calcJustCalculated = true;
   } catch {
     input.value = 'Error';
   }
@@ -1221,15 +1304,30 @@ function toggleTheme() {
     document.documentElement.style.setProperty('--border', '#353d54');
   }
 
-  if (typeof renderQuickSettings === 'function') {
-    renderQuickSettings();
-  }
+  localStorage.setItem('otx-os-theme', light ? 'light' : 'dark');
+  if (typeof renderQuickSettings === 'function') renderQuickSettings();
 }
+
+(function applySavedTheme() {
+  const saved = localStorage.getItem('otx-os-theme');
+  if (saved === 'light') {
+    document.documentElement.style.setProperty('--bg', '#f3f4f8');
+    document.documentElement.style.setProperty('--panel', '#ffffff');
+    document.documentElement.style.setProperty('--card', '#e4e7ef');
+    document.documentElement.style.setProperty('--text', '#151827');
+    document.documentElement.style.setProperty('--muted', '#62697b');
+    document.documentElement.style.setProperty('--border', '#cbd0dc');
+  }
+})();
 
 function clearAllData() {
   if (!confirm('This will delete contacts, notes and call records. Continue?')) return;
 
   Object.values(STORAGE).forEach(key => localStorage.removeItem(key));
+  localStorage.removeItem(NOTES_KEY);
+  localStorage.removeItem('otx-os-do-not-disturb');
+  localStorage.removeItem('otx-os-notifications');
+  localStorage.removeItem('otx-os-theme');
   alert('OTX OS data cleared.');
   home();
 }
@@ -1264,161 +1362,234 @@ if ('serviceWorker' in navigator) {
 
 
 // OTX OS NOTIFICATION CENTRE
-
 const notificationPanel = document.getElementById('notification-panel');
-
-let quickSettings = {
-  wifi: true,
-  airplane: false,
-  dnd: false
-};
-
-let notifications = [
-  {
-    title: 'Welcome to OTX OS 1.2',
+const DND_KEY = 'otx-os-do-not-disturb';
+const NOTIFICATIONS_KEY = 'otx-os-notifications';
+let quickSettings = { dnd: localStorage.getItem(DND_KEY) === 'true' };
+let notifications = [];
+try {
+  notifications = JSON.parse(localStorage.getItem(NOTIFICATIONS_KEY) || '[]');
+  if (!Array.isArray(notifications)) notifications = [];
+} catch { notifications = []; }
+if (!notifications.length) {
+  notifications.push({
+    title: 'Welcome to OTX OS',
     message: 'Your notification centre is ready.',
     time: new Date().toLocaleTimeString()
-  }
-];
+  });
+}
 
 function openNotifications() {
   notificationPanel.classList.add('open');
   updateNotificationClock();
   renderNotifications();
 }
-
 function closeNotifications() {
   notificationPanel.classList.remove('open');
 }
-
 function updateNotificationClock() {
   const now = new Date();
-
-  document.getElementById('panel-time').textContent =
-    now.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
-
-  document.getElementById('panel-date').textContent =
-    now.toLocaleDateString([], {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
+  document.getElementById('panel-time').textContent = now.toLocaleTimeString([], {
+    hour: '2-digit', minute: '2-digit', hour12: true
+  });
+  document.getElementById('panel-date').textContent = now.toLocaleDateString([], {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
 }
-
-function toggleQuickSetting(setting) {
-  quickSettings[setting] = !quickSettings[setting];
-
-  // Airplane mode disables the simulated Wi-Fi tile.
-  if (setting === 'airplane' && quickSettings.airplane) {
-    quickSettings.wifi = false;
-  }
-
+function toggleDoNotDisturb() {
+  quickSettings.dnd = !quickSettings.dnd;
+  localStorage.setItem(DND_KEY, String(quickSettings.dnd));
   renderQuickSettings();
+  addNotification('Do Not Disturb', quickSettings.dnd
+    ? 'Enabled. OTX OS pop-up alerts are muted; notifications are still saved.'
+    : 'Disabled. OTX OS pop-up alerts are enabled.');
 }
-
 function renderQuickSettings() {
-  Object.keys(quickSettings).forEach(setting => {
-    const tile = document.getElementById(setting + '-tile');
-    if (tile) {
-      tile.classList.toggle('active', quickSettings[setting]);
-    }
-  });
-
-  document.getElementById('theme-tile').classList.toggle(
-    'active',
-    getComputedStyle(document.documentElement)
-      .getPropertyValue('--bg').trim() !== '#f3f4f8'
-  );
+  const dndTile = document.getElementById('dnd-tile');
+  if (dndTile) {
+    dndTile.classList.toggle('active', quickSettings.dnd);
+    dndTile.setAttribute('aria-pressed', String(quickSettings.dnd));
+    dndTile.innerHTML = quickSettings.dnd
+      ? '<span>🌙</span> Do Not Disturb: On'
+      : '<span>🌙</span> Do Not Disturb: Off';
+  }
+  const themeTile = document.getElementById('theme-tile');
+  if (themeTile) {
+    const isDark = getComputedStyle(document.documentElement)
+      .getPropertyValue('--bg').trim() !== '#f3f4f8';
+    themeTile.classList.toggle('active', isDark);
+    themeTile.setAttribute('aria-pressed', String(isDark));
+  }
 }
-
 function setBrightness(value) {
-  document.documentElement.style.setProperty(
-    '--screen-brightness',
-    value / 100
-  );
-  document.body.style.filter = `brightness(${value / 100})`;
+  const level = Math.max(10, Math.min(100, Number(value))) / 100;
+  document.documentElement.style.setProperty('--screen-brightness', level);
+  document.body.style.filter = `brightness(${level})`;
 }
-
+function persistNotifications() {
+  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifications.slice(0, 30)));
+}
+function showNotificationToast(title, message) {
+  const toast = document.getElementById('notification-toast');
+  if (!toast) return;
+  toast.replaceChildren();
+  const heading = document.createElement('strong');
+  heading.textContent = title;
+  const body = document.createElement('span');
+  body.textContent = message;
+  toast.append(heading, body);
+  toast.classList.add('show');
+  clearTimeout(window.otxToastTimer);
+  window.otxToastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
+}
 function addNotification(title, message) {
-  if (quickSettings.dnd) return;
-
-  notifications.unshift({
-    title,
-    message,
-    time: new Date().toLocaleTimeString()
-  });
-
+  notifications.unshift({ title, message, time: new Date().toLocaleTimeString() });
   notifications = notifications.slice(0, 30);
+  persistNotifications();
   renderNotifications();
+  if (!quickSettings.dnd) showNotificationToast(title, message);
 }
-
 function renderNotifications() {
   const container = document.getElementById('notification-list');
+  if (!container) return;
   container.replaceChildren();
-
   if (!notifications.length) {
-    container.innerHTML =
-      '<div class="empty">No notifications</div>';
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.textContent = 'No notifications';
+    container.appendChild(empty);
     return;
   }
-
   notifications.forEach(notification => {
     const item = document.createElement('div');
     item.className = 'notification-item';
-
     const title = document.createElement('strong');
     title.textContent = notification.title;
-
     const message = document.createElement('div');
     message.textContent = notification.message;
-
     const time = document.createElement('small');
     time.textContent = notification.time;
-
     item.append(title, message, time);
     container.appendChild(item);
   });
 }
-
 function clearNotifications() {
   notifications = [];
+  persistNotifications();
   renderNotifications();
 }
 
-// Battery information, when supported by the browser.
+// Battery API is optional; hide the indicator if the browser does not support it.
 async function updateBattery() {
-  if (!navigator.getBattery) {
-    document.getElementById('battery-level').textContent =
-      'Battery: unavailable';
+  const label = document.getElementById('battery-level');
+  if (typeof navigator.getBattery !== 'function') {
+    label.hidden = true;
     return;
   }
-
   try {
     const battery = await navigator.getBattery();
-
     function showBattery() {
-      document.getElementById('battery-level').textContent =
-        'Battery: ' + Math.round(battery.level * 100) + '%' +
+      if (!Number.isFinite(battery.level)) { label.hidden = true; return; }
+      label.textContent = 'Battery: ' + Math.round(battery.level * 100) + '%' +
         (battery.charging ? ' ⚡' : '');
+      label.hidden = false;
     }
-
     showBattery();
     battery.addEventListener('levelchange', showBattery);
     battery.addEventListener('chargingchange', showBattery);
-  } catch {
-    document.getElementById('battery-level').textContent =
-      'Battery: unavailable';
-  }
+  } catch { label.hidden = true; }
 }
-
 updateBattery();
 updateNotificationClock();
 renderQuickSettings();
+renderNotifications();
+
+// CAMERA: live preview where supported, with file-picker fallback.
+let cameraStream = null;
+let cameraFacing = 'environment';
+let capturedPhotoUrl = null;
+let capturedPhotoExtension = 'jpg';
+async function startCamera() {
+  const status = document.getElementById('camera-status');
+  const video = document.getElementById('camera-video');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    status.textContent = 'Live camera is not supported here. Use the image picker below.';
+    return;
+  }
+  stopCamera();
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: cameraFacing }, width: { ideal: 1280 }, height: { ideal: 1600 } }
+    });
+    video.srcObject = cameraStream;
+    video.style.display = 'block';
+    await video.play();
+    document.getElementById('camera-capture').disabled = false;
+    document.getElementById('camera-stop').disabled = false;
+    document.getElementById('camera-switch').disabled = false;
+    status.textContent = 'Camera is ready. Press Capture Photo when you are ready.';
+  } catch (error) {
+    status.textContent = error.name === 'NotAllowedError'
+      ? 'Camera permission was denied. Allow camera access in browser settings or choose an image below.'
+      : 'Could not start the camera. You can still choose an image below.';
+  }
+}
+function stopCamera() {
+  if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
+  cameraStream = null;
+  const video = document.getElementById('camera-video');
+  if (video) { video.srcObject = null; video.style.display = 'none'; }
+  ['camera-capture','camera-stop','camera-switch'].forEach(id => {
+    const button = document.getElementById(id);
+    if (button) button.disabled = true;
+  });
+}
+async function switchCamera() {
+  cameraFacing = cameraFacing === 'environment' ? 'user' : 'environment';
+  await startCamera();
+}
+function capturePhoto() {
+  const video = document.getElementById('camera-video');
+  if (!cameraStream || !video.videoWidth) return;
+  const canvas = document.getElementById('camera-canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  canvas.toBlob(blob => {
+    if (!blob) return;
+    if (capturedPhotoUrl) URL.revokeObjectURL(capturedPhotoUrl);
+    capturedPhotoUrl = URL.createObjectURL(blob);
+    capturedPhotoExtension = 'jpg';
+    const result = document.getElementById('camera-result');
+    result.src = capturedPhotoUrl;
+    result.style.display = 'block';
+    document.getElementById('camera-download').classList.remove('hidden');
+    document.getElementById('camera-status').textContent = 'Photo captured. Save it to download the image.';
+    addNotification('Camera', 'A photo was captured in OTX OS.');
+  }, 'image/jpeg', 0.92);
+}
+function handleCameraFile(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (capturedPhotoUrl) URL.revokeObjectURL(capturedPhotoUrl);
+  capturedPhotoUrl = URL.createObjectURL(file);
+  capturedPhotoExtension = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const result = document.getElementById('camera-result');
+  result.src = capturedPhotoUrl;
+  result.style.display = 'block';
+  document.getElementById('camera-download').classList.remove('hidden');
+  document.getElementById('camera-status').textContent = 'Image selected. Save it to download a copy.';
+}
+function downloadCapturedPhoto() {
+  if (!capturedPhotoUrl) return;
+  const link = document.createElement('a');
+  link.href = capturedPhotoUrl;
+  link.download = 'otx-os-photo-' + new Date().toISOString().replace(/[:.]/g, '-') + '.' + capturedPhotoExtension;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
 
 // Close with Escape.
 document.addEventListener('keydown', event => {
