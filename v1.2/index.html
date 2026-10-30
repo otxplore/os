@@ -52,6 +52,20 @@ textarea {min-height:100px;resize:vertical}
   font-size:13px;
   color:var(--muted);
 }
+
+#notification-button {
+  background:transparent;
+  border:0;
+  color:var(--muted);
+  font-size:18px;
+  cursor:pointer;
+  padding:2px 6px;
+  border-radius:8px;
+  line-height:1;
+}
+#notification-button:active {
+  background:rgba(255,189,53,.2);
+}
 header {
   padding:20px;
   display:flex;
@@ -331,6 +345,10 @@ body.dimmed {
     <span id="date">--/--/----</span>
   </span>
   <span>● Wi-Fi &nbsp; ▰</span>
+  <button id="notification-button"
+          onclick="openNotifications()"
+          aria-label="Open notifications"
+          title="Notifications">🔔</button>
 </div>
 
 
@@ -727,8 +745,6 @@ function updateClock() {
     updateNotificationClock();
 }
 
-updateClock();
-setInterval(updateClock, 1000);
 updateClock();
 setInterval(updateClock, 1000);
 
@@ -1204,6 +1220,10 @@ function toggleTheme() {
     document.documentElement.style.setProperty('--muted', '#aab1c5');
     document.documentElement.style.setProperty('--border', '#353d54');
   }
+
+  if (typeof renderQuickSettings === 'function') {
+    renderQuickSettings();
+  }
 }
 
 function clearAllData() {
@@ -1400,31 +1420,6 @@ updateBattery();
 updateNotificationClock();
 renderQuickSettings();
 
-// Swipe gestures from the top edge.
-let touchStartY = 0;
-let touchStartX = 0;
-
-document.addEventListener('touchstart', event => {
-  touchStartY = event.touches[0].clientY;
-  touchStartX = event.touches[0].clientX;
-}, {passive: true});
-
-document.addEventListener('touchend', event => {
-  const endY = event.changedTouches[0].clientY;
-  const endX = event.changedTouches[0].clientX;
-  const difference = endY - touchStartY;
-
-  if (touchStartY < 45 && difference > 80 &&
-      Math.abs(endX - touchStartX) < 100) {
-    openNotifications();
-  }
-
-  if (notificationPanel.classList.contains('open') &&
-      difference < -80) {
-    closeNotifications();
-  }
-}, {passive: true});
-
 // Close with Escape.
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') closeNotifications();
@@ -1434,4 +1429,3 @@ document.addEventListener('keydown', event => {
 
 </body>
 </html>
-
