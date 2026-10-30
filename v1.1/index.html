@@ -369,14 +369,32 @@ nav span {display:block;font-size:20px;margin-bottom:4px}
 </section>
 
 <!-- NOTES -->
+
 <section class="screen" id="notes">
   <div class="screen-header">
     <button class="back" onclick="home()">←</button>
     <h2>Notes</h2>
   </div>
-  <textarea id="notes-content" placeholder="Write your notes here..."></textarea>
-  <button class="primary full" onclick="saveNotes()">Save Notes</button>
+
+  <button class="primary full" onclick="createNote()">＋ New Note</button>
+
+  <div id="notes-list"></div>
+
+  <div id="note-editor" class="card hidden">
+    <input id="note-title" placeholder="Note title">
+    <textarea id="note-content" placeholder="Write your note here..."
+      oninput="saveCurrentNote()"></textarea>
+
+    <div class="actions">
+      <button class="primary" onclick="saveCurrentNote()">Save</button>
+      <button onclick="closeNoteEditor()">Back</button>
+      <button class="danger" onclick="deleteCurrentNote()">Delete</button>
+    </div>
+
+    <p class="muted" id="note-status">Not saved</p>
+  </div>
 </section>
+
 
 <!-- FILES -->
 <section class="screen" id="files">
@@ -481,8 +499,10 @@ function openApp(id) {
   if (id === 'phone') renderPhone();
   if (id === 'history') renderHistory();
   if (id === 'notes') {
-    document.getElementById('notes-content').value =
-      localStorage.getItem(STORAGE.notes) || '';
+   currentNoteId = null;
+   document.getElementById('note-editor').classList.add('hidden');
+   document.getElementById('notes-list').classList.remove('hidden');
+   renderNotes();
   }
 }
 
@@ -816,14 +836,124 @@ function calculate() {
   }
 }
 
-// NOTES
-function saveNotes() {
-  localStorage.setItem(
-    STORAGE.notes,
-    document.getElementById('notes-content').value
-  );
-  alert('Notes saved.');
+
+const NOTES_KEY = 'otx-notes-list';
+let currentNoteId = null;
+
+function getNotes() {
+  try {
+    return JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
+  } catch {
+    return [];
+  }
 }
+
+function storeNotes(notes) {
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+}
+
+function renderNotes() {
+  const container = document.getElementById('notes-list');
+  container.replaceChildren();
+
+  const notes = getNotes().sort((a, b) => b.updated - a.updated);
+
+  if (!notes.length) {
+    container.innerHTML = '<div class="empty">No notes yet. Create your first note.</div>';
+    return;
+  }
+
+  notes.forEach(note => {
+    const item = document.createElement('div');
+    item.className = 'list-item';
+
+    const title = document.createElement('strong');
+    title.textContent = note.title || 'Untitled Note';
+
+    const preview = document.createElement('div');
+    preview.className = 'muted';
+    preview.textContent = note.content || 'Empty note';
+
+    const date = document.createElement('div');
+    date.className = 'muted';
+    date.textContent = new Date(note.updated).toLocaleString();
+
+    item.append(title, preview, date);
+    item.onclick = () => openNote(note.id);
+
+    container.appendChild(item);
+  });
+}
+
+function createNote() {
+  const note = {
+    id: Date.now().toString(),
+    title: '',
+    content: '',
+    updated: Date.now()
+  };
+
+  const notes = getNotes();
+  notes.push(note);
+  storeNotes(notes);
+
+  openNote(note.id);
+}
+
+function openNote(id) {
+  const note = getNotes().find(n => n.id === id);
+  if (!note) return;
+
+  currentNoteId = id;
+
+  document.getElementById('note-title').value = note.title;
+  document.getElementById('note-content').value = note.content;
+
+  document.getElementById('notes-list').classList.add('hidden');
+  document.getElementById('note-editor').classList.remove('hidden');
+  document.getElementById('note-status').textContent = 'Saved';
+}
+
+function saveCurrentNote() {
+  if (!currentNoteId) return;
+
+  const notes = getNotes();
+  const note = notes.find(n => n.id === currentNoteId);
+  if (!note) return;
+
+  note.title = document.getElementById('note-title').value;
+  note.content = document.getElementById('note-content').value;
+  note.updated = Date.now();
+
+  storeNotes(notes);
+  document.getElementById('note-status').textContent = 'Saved';
+}
+
+function closeNoteEditor() {
+  saveCurrentNote();
+  currentNoteId = null;
+
+  document.getElementById('note-editor').classList.add('hidden');
+  document.getElementById('notes-list').classList.remove('hidden');
+
+  renderNotes();
+}
+
+function deleteCurrentNote() {
+  if (!currentNoteId || !confirm('Delete this note?')) return;
+
+  const notes = getNotes().filter(n => n.id !== currentNoteId);
+  storeNotes(notes);
+
+  currentNoteId = null;
+  document.getElementById('note-editor').classList.add('hidden');
+  document.getElementById('notes-list').classList.remove('hidden');
+
+  renderNotes();
+}
+
+
+
 
 // BROWSER
 function browse() {
