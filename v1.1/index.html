@@ -193,7 +193,11 @@ nav span {display:block;font-size:20px;margin-bottom:4px}
 
 <div id="status">
   <span>OTX OS</span>
-  <span id="clock">--:--</span>
+  <span>
+    <span id="clock">--:--</span>
+    &nbsp; | &nbsp;
+    <span id="date">--/--/----</span>
+  </span>
   <span>● Wi-Fi &nbsp; ▰</span>
 </div>
 
@@ -512,9 +516,26 @@ function home() {
 }
 
 function updateClock() {
+  const now = new Date();
+
   document.getElementById('clock').textContent =
-    new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    now.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+
+  document.getElementById('date').textContent =
+    now.toLocaleDateString([], {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
 }
+
+updateClock();
+setInterval(updateClock, 1000);
 updateClock();
 setInterval(updateClock, 1000);
 
