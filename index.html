@@ -1,0 +1,752 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101321">
+<title>OTX OS</title>
+
+<style>
+:root {
+  --bg: #101321;
+  --panel: #1c2234;
+  --card: #252d43;
+  --text: #ffffff;
+  --muted: #aab2c5;
+  --accent: #ffb000;
+  --orange: #ff7028;
+  --border: rgba(255,255,255,.09);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+body.light {
+  --bg: #f2f4f8;
+  --panel: #ffffff;
+  --card: #e7ebf3;
+  --text: #172033;
+  --muted: #657086;
+  --border: rgba(0,0,0,.1);
+}
+
+button, input, textarea { font: inherit; }
+
+button {
+  cursor: pointer;
+  border: none;
+}
+
+#os {
+  min-height: 100vh;
+  max-width: 650px;
+  margin: auto;
+  padding: 18px;
+  padding-bottom: 95px;
+  position: relative;
+}
+
+.status {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.status-right {
+  display: flex;
+  gap: 10px;
+}
+
+.hero {
+  margin: 65px 0 45px;
+}
+
+#clock {
+  font-size: clamp(55px, 13vw, 82px);
+  font-weight: 300;
+  letter-spacing: -4px;
+  line-height: 1.1;
+}
+
+#date {
+  color: var(--muted);
+  font-size: 15px;
+  margin-top: 8px;
+}
+
+.greeting {
+  margin-top: 28px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.section-title {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 28px 0 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.apps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px 10px;
+}
+
+.app {
+  background: transparent;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.app-icon {
+  width: 57px;
+  height: 57px;
+  border-radius: 19px;
+  display: grid;
+  place-items: center;
+  background: var(--card);
+  font-size: 25px;
+  transition: .2s;
+}
+
+.app:active .app-icon {
+  transform: scale(.9);
+}
+
+.app-name {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.feature {
+  background: linear-gradient(120deg, #283750, #51351e);
+  border-radius: 20px;
+  padding: 19px;
+  margin-top: 30px;
+}
+
+body.light .feature {
+  background: linear-gradient(120deg, #e0e9f8, #fff0d9);
+}
+
+.feature h3 { margin: 0 0 6px; }
+
+.feature p {
+  margin: 0 0 15px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.primary {
+  background: var(--accent);
+  color: #171717;
+  border-radius: 12px;
+  padding: 10px 17px;
+  font-weight: 700;
+}
+
+.dock {
+  position: fixed;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(440px, calc(100% - 30px));
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 23px;
+  padding: 13px;
+  display: flex;
+  justify-content: space-around;
+  z-index: 5;
+  backdrop-filter: blur(20px);
+}
+
+.dock button {
+  background: transparent;
+  color: var(--text);
+  font-size: 23px;
+}
+
+/* App windows */
+
+.screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: var(--bg);
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.screen.active { display: block; }
+
+.screen-content {
+  max-width: 600px;
+  margin: auto;
+  padding-bottom: 35px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0 30px;
+}
+
+.topbar h2 { margin: 0; }
+
+.back {
+  color: var(--accent);
+  background: transparent;
+  font-size: 15px;
+}
+
+.panel {
+  background: var(--panel);
+  padding: 18px;
+  border-radius: 18px;
+  margin-bottom: 15px;
+}
+
+.panel h3 { margin-top: 0; }
+
+.field {
+  width: 100%;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 13px;
+  margin: 8px 0;
+}
+
+textarea.field {
+  min-height: 180px;
+  resize: vertical;
+}
+
+.calc-display {
+  width: 100%;
+  text-align: right;
+  font-size: 38px;
+  padding: 20px 5px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+}
+
+.calc-grid button {
+  background: var(--card);
+  color: var(--text);
+  padding: 18px 5px;
+  border-radius: 14px;
+  font-size: 19px;
+}
+
+.calc-grid button.operator {
+  color: var(--accent);
+}
+
+.list-button {
+  width: 100%;
+  text-align: left;
+  background: var(--card);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 5px 0;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.app-store {
+  background: linear-gradient(130deg,#282f45,#54351c);
+  padding: 25px;
+  border-radius: 20px;
+  margin-bottom: 18px;
+}
+
+@media(min-width: 650px) {
+  #os { padding-top: 30px; }
+}
+</style>
+
+<link rel="manifest" href="/manifest.json">
+</head>
+
+<body>
+<div id="os">
+
+  <div class="status">
+    <span id="status-time">--:--</span>
+    <div class="status-right">
+      <span>● Wi-Fi</span>
+      <span id="battery">🔋</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div id="clock">00:00</div>
+    <div id="date"></div>
+    <div class="greeting">Welcome to <strong>OTX OS</strong>.</div>
+  </div>
+
+  <div class="section-title">Applications</div>
+
+  <div class="apps">
+
+    <button class="app" onclick="openApp('calculator')">
+      <span class="app-icon">🧮</span>
+      <span class="app-name">Calculator</span>
+    </button>
+
+    <button class="app" onclick="openApp('notes')">
+      <span class="app-icon">📝</span>
+      <span class="app-name">Notes</span>
+    </button>
+
+    <button class="app" onclick="openApp('files')">
+      <span class="app-icon">📁</span>
+      <span class="app-name">Files</span>
+    </button>
+
+    <button class="app" onclick="openApp('browser')">
+      <span class="app-icon">🌐</span>
+      <span class="app-name">Browser</span>
+    </button>
+
+    <button class="app" onclick="openApp('contacts')">
+      <span class="app-icon">👤</span>
+      <span class="app-name">Contacts</span>
+    </button>
+
+    <button class="app" onclick="openApp('camera')">
+      <span class="app-icon">📷</span>
+      <span class="app-name">Camera</span>
+    </button>
+
+    <button class="app" onclick="openApp('settings')">
+      <span class="app-icon">⚙️</span>
+      <span class="app-name">Settings</span>
+    </button>
+
+    <button class="app" onclick="openApp('store')">
+      <span class="app-icon">🛍️</span>
+      <span class="app-name">App Store</span>
+    </button>
+
+  </div>
+
+  <div class="feature">
+    <h3>Discover OTX Apps</h3>
+    <p>Explore applications and utilities from the OTXS ecosystem.</p>
+    <button class="primary" onclick="openApp('store')">Explore Store →</button>
+  </div>
+
+  <div class="section-title">System</div>
+  <p class="muted">OTX OS Web Edition · Version 1.0</p>
+
+</div>
+
+<!-- Bottom dock -->
+<div class="dock">
+  <button onclick="home()" title="Home">⌂</button>
+  <button onclick="openApp('browser')" title="Browser">🌐</button>
+  <button onclick="openApp('store')" title="Store">▣</button>
+  <button onclick="openApp('settings')" title="Settings">⚙</button>
+</div>
+
+<!-- Calculator -->
+<div class="screen" id="calculator">
+  <div class="screen-content">
+    <div class="topbar">
+      <h2>Calculator</h2>
+      <button class="back" onclick="home()">✕ Close</button>
+    </div>
+    <div class="panel">
+      <input class="calc-display" id="calc-display" value="0" readonly>
+      <div class="calc-grid">
+        <button onclick="calcClear()">C</button>
+        <button onclick="calcAdd('(')">(</button>
+        <button onclick="calcAdd(')')">)</button>
+        <button class="operator" onclick="calcAdd('/')">÷</button>
+
+        <button onclick="calcAdd('7')">7</button>
+        <button onclick="calcAdd('8')">8</button>
+        <button onclick="calcAdd('9')">9</button>
+        <button class="operator" onclick="calcAdd('*')">×</button>
+
+        <button onclick="calcAdd('4')">4</button>
+        <button onclick="calcAdd('5')">5</button>
+        <button onclick="calcAdd('6')">6</button>
+        <button class="operator" onclick="calcAdd('-')">−</button>
+
+        <button onclick="calcAdd('1')">1</button>
+        <button onclick="calcAdd('2')">2</button>
+        <button onclick="calcAdd('3')">3</button>
+        <button class="operator" onclick="calcAdd('+')">+</button>
+
+        <button onclick="calcAdd('0')">0</button>
+        <button onclick="calcAdd('.')">.</button>
+        <button onclick="calcDelete()">⌫</button>
+        <button class="operator" onclick="calcResult()">=</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notes -->
+<div class="screen" id="notes">
+  <div class="screen-content">
+    <div class="topbar">
+      <h2>Notes</h2>
+      <button class="back" onclick="home()">✕ Close</button>
+    </div>
+    <div class="panel">
+      <textarea id="notes-text" class="field"
+        placeholder="Write something..."></textarea>
+      <button class="primary" onclick="saveNotes()">Save Notes</button>
+      <p class="muted" id="notes-status">Notes are stored on this device.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Files -->
+<div class="screen" id="files">
+  <div class="screen-content">
+    <div class="topbar">
+      <h2>Files</h2>
+      <button class="back" onclick="home()">✕ Close</button>
+    </div>
+    <div class="panel">
+      <p>Access files using your device's file picker.</p>
+      <button class="primary" onclick="pickFiles()">Browse Files</button>
+      <div id="file-list" class="muted"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Browser -->
+<div class="screen" id="browser">
+  <div class="screen-content">
+    <div class="topbar">
+      <h2>Browser</h2>
+      <button class="back" onclick="home()">✕ Close</button>
+    </div>
+    <div class="panel">
+      <input class="field" id="browser-url"
+        placeholder="Enter website address">
+      <button class="primary" onclick="browse()">Open Website</button>
+      <p class="muted">Websites open in your device browser.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Contacts -->
+<div class="screen" id="contacts">
+  <div class="screen-content">
+    <div class="topbar">
+      <h2>Contacts</h2>
+      <button class="back" onclick="home()">✕ Close</button>
+    </div>
+    <div class="panel">
+      <p>Manage your contacts using your device's contacts application.</p>
+      <button class="primary" onclick="window.location.href='tel:'">
+        Open Phone
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Camera -->
+<div class="screen" id="camera">
+  <div class="screen-content">
+    <div class="topbar">
+      <h2>Camera</h2>
+      <button class="back" onclick="home()">✕ Close</button>
+    </div>
+    <div class="panel">
+      <p>Use your device camera.</p>
+      <button class="primary" onclick="openCamera()">Open Camera</button>
+      <div id="camera-view"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="screen" id="settings">
+  <div class="screen-content">
+    <div class="topbar">
+      <h2>Settings</h2>
+      <button class="back" onclick="home()">✕ Close</button>
+    </div>
+
+    <div class="panel">
+      <h3>Appearance</h3>
+      <button class="list-button" onclick="toggleTheme()">
+        🌙 Toggle Dark / Light Mode
+      </button>
+    </div>
+
+    <div class="panel">
+      <h3>System Information</h3>
+      <p class="muted">Operating System: OTX OS Web</p>
+      <p class="muted">Version: 1.0</p>
+      <p class="muted">Platform: Progressive Web App</p>
+    </div>
+
+    <div class="panel">
+      <h3>Installation</h3>
+      <button class="primary" onclick="installApp()">
+        Install OTX OS
+      </button>
+      <p class="muted" id="install-status">
+        Install availability depends on your browser.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- App Store -->
+<div class="screen" id="store">
+  <div class="screen-content">
+    <div class="topbar">
+      <h2>OTX App Store</h2>
+      <button class="back" onclick="home()">✕ Close</button>
+    </div>
+
+    <div class="app-store">
+      <h2>Discover more apps.</h2>
+      <p>Explore the OTXS application ecosystem.</p>
+      <button class="primary"
+        onclick="window.open('https://apps.otxs.de/','_blank','noopener')">
+        Visit App Store →
+      </button>
+    </div>
+
+    <div class="panel">
+      <h3>OTXS Ecosystem</h3>
+      <p class="muted">
+        Explore applications, games and utilities developed
+        for the OTXS platform.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Clock and date
+function updateClock() {
+  const now = new Date();
+  const time = now.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+
+  document.getElementById('clock').textContent = time;
+  document.getElementById('status-time').textContent = time;
+  document.getElementById('date').textContent =
+    now.toLocaleDateString([], {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+}
+
+updateClock();
+setInterval(updateClock, 1000);
+
+// App navigation
+function openApp(id) {
+  document.querySelectorAll('.screen').forEach(screen => {
+    screen.classList.remove('active');
+  });
+
+  document.getElementById(id).classList.add('active');
+
+  if(id === 'notes') {
+    document.getElementById('notes-text').value =
+      localStorage.getItem('otx-notes') || '';
+  }
+}
+
+function home() {
+  document.querySelectorAll('.screen').forEach(screen => {
+    screen.classList.remove('active');
+  });
+}
+
+// Calculator
+let expression = '';
+
+function calcAdd(value) {
+  if(expression.length > 40) return;
+  expression += value;
+  document.getElementById('calc-display').value = expression;
+}
+
+function calcClear() {
+  expression = '';
+  document.getElementById('calc-display').value = '0';
+}
+
+function calcDelete() {
+  expression = expression.slice(0, -1);
+  document.getElementById('calc-display').value = expression || '0';
+}
+
+function calcResult() {
+  try {
+    if(!/^[0-9+\-*/().\s]+$/.test(expression)) {
+      throw new Error('Invalid');
+    }
+
+    const result = Function('"use strict"; return (' + expression + ')')();
+
+    if(!Number.isFinite(result)) throw new Error('Invalid');
+
+    expression = String(Number(result.toPrecision(12)));
+    document.getElementById('calc-display').value = expression;
+  } catch {
+    expression = '';
+    document.getElementById('calc-display').value = 'Error';
+  }
+}
+
+// Notes
+function saveNotes() {
+  localStorage.setItem(
+    'otx-notes',
+    document.getElementById('notes-text').value
+  );
+
+  document.getElementById('notes-status').textContent =
+    'Saved successfully on this device.';
+}
+
+// Theme
+function toggleTheme() {
+  document.body.classList.toggle('light');
+
+  localStorage.setItem(
+    'otx-theme',
+    document.body.classList.contains('light') ? 'light' : 'dark'
+  );
+}
+
+if(localStorage.getItem('otx-theme') === 'light') {
+  document.body.classList.add('light');
+}
+
+// File picker
+function pickFiles() {
+  const picker = document.createElement('input');
+  picker.type = 'file';
+  picker.multiple = true;
+
+  picker.onchange = () => {
+    document.getElementById('file-list').textContent =
+      Array.from(picker.files).map(file => file.name).join(', ') ||
+      'No files selected.';
+  };
+
+  picker.click();
+}
+
+// Browser
+function browse() {
+  let url = document.getElementById('browser-url').value.trim();
+
+  if(!url) return;
+
+  if(!/^https?:\/\//i.test(url)) {
+    url = 'https://' + url;
+  }
+
+  try {
+    const parsed = new URL(url);
+
+    if(!['http:', 'https:'].includes(parsed.protocol)) return;
+
+    window.open(parsed.href, '_blank', 'noopener');
+  } catch {
+    alert('Please enter a valid website address.');
+  }
+}
+
+// Camera
+function openCamera() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
+  input.click();
+}
+
+// PWA installation
+let installPrompt = null;
+
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  installPrompt = event;
+  document.getElementById('install-status').textContent =
+    'Your browser supports installation.';
+});
+
+async function installApp() {
+  if(installPrompt) {
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt = null;
+  } else {
+    document.getElementById('install-status').textContent =
+      'Use your browser menu and select Add to Home Screen or Install.';
+  }
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', event => {
+  if(event.key === 'Escape') home();
+});
+
+
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
+
+
+</script>
+
+</body>
+</html>
+
