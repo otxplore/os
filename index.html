@@ -320,6 +320,11 @@ textarea.field {
 
   <div class="apps">
 
+    <button class="app" onclick="openApp('dialer')">
+      <span class="app-icon">📞</span>
+      <span class="app-name">Phone</span>
+    </button>
+
     <button class="app" onclick="openApp('calculator')">
       <span class="app-icon">🧮</span>
       <span class="app-name">Calculator</span>
@@ -380,6 +385,74 @@ textarea.field {
   <button onclick="openApp('store')" title="Store">▣</button>
   <button onclick="openApp('settings')" title="Settings">⚙</button>
 </div>
+
+<!-- Phone Dialer -->
+<div class="screen" id="dialer">
+  <div class="screen-content">
+    <div class="topbar">
+      <h2>Phone</h2>
+      <button class="back" onclick="home()">✕ Close</button>
+    </div>
+
+    <div class="panel">
+      <p class="muted">Enter phone number</p>
+
+      <input
+        class="calc-display"
+        id="phone-number"
+        type="tel"
+        placeholder="Enter number"
+        autocomplete="tel"
+        inputmode="tel"
+      >
+
+      <div class="calc-grid">
+        <button onclick="dialAdd('1')">1</button>
+        <button onclick="dialAdd('2')">2</button>
+        <button onclick="dialAdd('3')">3</button>
+
+        <button onclick="dialAdd('4')">4</button>
+        <button onclick="dialAdd('5')">5</button>
+        <button onclick="dialAdd('6')">6</button>
+
+        <button onclick="dialAdd('7')">7</button>
+        <button onclick="dialAdd('8')">8</button>
+        <button onclick="dialAdd('9')">9</button>
+
+        <button onclick="dialAdd('*')">*</button>
+        <button onclick="dialAdd('0')">0</button>
+        <button onclick="dialAdd('#')">#</button>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="primary"
+          style="flex:1;background:#22a65a;color:white"
+          onclick="makeCall()">
+          📞 Call
+        </button>
+
+        <button class="primary"
+          style="background:#d94b4b;color:white"
+          onclick="dialClear()">
+          Clear
+        </button>
+
+        <button class="primary"
+          onclick="dialBackspace()">
+          ⌫
+        </button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Recent Calls</h3>
+      <div id="recent-calls" class="muted">
+        No recent calls.
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- Calculator -->
 <div class="screen" id="calculator">
@@ -560,6 +633,92 @@ textarea.field {
 </div>
 
 <script>
+
+
+// OTX OS Phone Dialer
+
+function dialAdd(value) {
+  const input = document.getElementById('phone-number');
+  input.value += value;
+}
+
+function dialClear() {
+  document.getElementById('phone-number').value = '';
+}
+
+function dialBackspace() {
+  const input = document.getElementById('phone-number');
+  input.value = input.value.slice(0, -1);
+}
+
+function makeCall() {
+  const input = document.getElementById('phone-number');
+  const number = input.value.trim();
+
+  if (!/^[0-9+*#().\-\s]{3,25}$/.test(number)) {
+    alert('Please enter a valid phone number.');
+    return;
+  }
+
+  const calls = JSON.parse(
+    localStorage.getItem('otx-recent-calls') || '[]'
+  );
+
+  calls.unshift({
+    number,
+    date: new Date().toLocaleString()
+  });
+
+  localStorage.setItem(
+    'otx-recent-calls',
+    JSON.stringify(calls.slice(0, 10))
+  );
+
+  renderRecentCalls();
+
+  // Opens the smartphone's native phone application.
+  window.location.href = 'tel:' + number;
+}
+
+function renderRecentCalls() {
+  const calls = JSON.parse(
+    localStorage.getItem('otx-recent-calls') || '[]'
+  );
+
+  const container = document.getElementById('recent-calls');
+
+  if (!calls.length) {
+    container.textContent = 'No recent calls.';
+    return;
+  }
+
+  container.innerHTML = '';
+
+  calls.forEach(call => {
+    const button = document.createElement('button');
+    button.className = 'list-button';
+
+    const number = document.createElement('strong');
+    number.textContent = '📞 ' + call.number;
+
+    const date = document.createElement('div');
+    date.className = 'muted';
+    date.textContent = call.date;
+
+    button.append(number, date);
+
+    button.onclick = () => {
+      document.getElementById('phone-number').value = call.number;
+    };
+
+    container.appendChild(button);
+  });
+}
+
+renderRecentCalls();
+
+
+
 // Clock and date
 function updateClock() {
   const now = new Date();
