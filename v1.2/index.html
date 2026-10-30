@@ -1,0 +1,1437 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101321">
+<title>OTX OS</title>
+<link rel="manifest" href="/manifest.json">
+
+<style>
+:root {
+  --bg:#101321;
+  --panel:#1b2032;
+  --card:#252c40;
+  --text:#fff;
+  --muted:#aab1c5;
+  --accent:#ffbd35;
+  --border:#353d54;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+button,input,select,textarea {font:inherit}
+button {
+  cursor:pointer;
+  border:0;
+  border-radius:12px;
+  padding:12px;
+  background:var(--card);
+  color:var(--text);
+}
+button:active {opacity:.7}
+input,textarea,select {
+  width:100%;
+  padding:13px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--bg);
+  color:var(--text);
+  margin:6px 0;
+}
+textarea {min-height:100px;resize:vertical}
+#status {
+  display:flex;
+  justify-content:space-between;
+  padding:12px 18px;
+  font-size:13px;
+  color:var(--muted);
+}
+header {
+  padding:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header h1 {margin:0;font-size:25px}
+.brand {color:var(--accent)}
+#home {padding:10px 20px 90px}
+.apps {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+  margin-top:25px;
+}
+.app {
+  background:transparent;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:9px;
+}
+.app-icon {
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  background:var(--panel);
+  display:grid;
+  place-items:center;
+  font-size:28px;
+}
+.app-name {font-size:13px}
+.screen {
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:5;
+  background:var(--bg);
+  overflow-y:auto;
+  padding:18px;
+  padding-bottom:35px;
+}
+.screen.active {display:block}
+.screen-header {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:20px;
+}
+.screen-header h2 {margin:0;font-size:21px}
+.back {font-size:20px;padding:9px 14px}
+.card {
+  background:var(--panel);
+  padding:15px;
+  border-radius:15px;
+  margin:12px 0;
+}
+.muted {color:var(--muted);font-size:12px}
+.section-title {
+  margin:22px 0 10px;
+  font-size:15px;
+  color:var(--accent);
+}
+.primary {
+  background:var(--accent);
+  color:#171717;
+  font-weight:bold;
+}
+.danger {background:#8d303b}
+.full {width:100%;margin-top:8px}
+.actions {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+.actions button {flex:1}
+.dial-display {
+  font-size:30px;
+  text-align:center;
+  letter-spacing:2px;
+  margin:25px 0;
+  background:transparent;
+  border:0;
+}
+.dial-pad {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  max-width:340px;
+  margin:auto;
+}
+.dial-pad button {
+  height:65px;
+  border-radius:50%;
+  font-size:23px;
+  background:var(--panel);
+}
+.call-button {
+  display:block;
+  margin:20px auto;
+  width:75px;
+  height:75px;
+  border-radius:50%;
+  background:#1b9b62;
+  font-size:28px;
+}
+.list-item {
+  background:var(--panel);
+  border-radius:13px;
+  padding:14px;
+  margin:9px 0;
+}
+.list-item strong {display:block;margin-bottom:5px}
+.list-item .actions button {font-size:12px;padding:9px}
+.empty {
+  text-align:center;
+  color:var(--muted);
+  padding:25px 10px;
+}
+nav {
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:var(--panel);
+  display:flex;
+  justify-content:space-around;
+  padding:12px;
+  z-index:4;
+}
+nav button {background:transparent;font-size:12px}
+nav span {display:block;font-size:20px;margin-bottom:4px}
+.hidden {display:none!important}
+
+
+
+#notification-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  z-index: 1000;
+  background: rgba(16,19,33,.98);
+  color: white;
+  padding: 18px;
+  overflow-y: auto;
+  transform: translateY(-110%);
+  transition: transform .3s ease;
+  border-radius: 0 0 22px 22px;
+}
+
+#notification-panel.open {
+  transform: translateY(0);
+}
+
+.notification-handle {
+  width: 45px;
+  height: 5px;
+  background: #737b91;
+  border-radius: 10px;
+  margin: 0 auto 25px;
+}
+
+.notification-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+#panel-time {
+  font-size: 42px;
+  font-weight: bold;
+}
+
+#panel-date {
+  color: #b8bfd0;
+  margin-top: 5px;
+}
+
+.quick-settings {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.quick-tile {
+  background: #252c40;
+  border: 1px solid #353d54;
+  min-height: 80px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  justify-content: center;
+}
+
+.quick-tile span {
+  font-size: 22px;
+}
+
+.quick-tile.active {
+  background: #ffbd35;
+  color: #171717;
+}
+
+.brightness-card {
+  background: #252c40;
+  padding: 16px;
+  border-radius: 14px;
+  margin-top: 18px;
+}
+
+.brightness-card input {
+  margin-top: 15px;
+  accent-color: #ffbd35;
+}
+
+.notification-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 25px 0 12px;
+}
+
+.notification-heading button {
+  background: transparent;
+  color: #ffbd35;
+  font-size: 12px;
+}
+
+.notification-item {
+  background: #252c40;
+  padding: 15px;
+  border-radius: 13px;
+  margin-bottom: 10px;
+}
+
+.notification-item strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.notification-item small {
+  color: #aab1c5;
+}
+
+.panel-footer {
+  display: flex;
+  justify-content: space-between;
+  color: #aab1c5;
+  font-size: 12px;
+  padding: 20px 0;
+}
+
+body.dimmed {
+  filter: brightness(var(--screen-brightness, 1));
+}
+
+@media (max-width: 380px) {
+  #panel-time {font-size: 35px}
+  .quick-tile {min-height: 70px;font-size: 12px}
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="status">
+  <span>OTX OS</span>
+  <span>
+    <span id="clock">--:--</span>
+    &nbsp; | &nbsp;
+    <span id="date">--/--/----</span>
+  </span>
+  <span>● Wi-Fi &nbsp; ▰</span>
+</div>
+
+
+<!-- OTX OS Notification Centre -->
+<div id="notification-panel">
+  <div class="notification-handle"></div>
+
+  <div class="notification-top">
+    <div>
+      <div id="panel-time">--:--</div>
+      <div id="panel-date">Loading date...</div>
+    </div>
+    <button onclick="closeNotifications()">✕</button>
+  </div>
+
+  <div class="quick-settings">
+    <button class="quick-tile active" id="wifi-tile"
+      onclick="toggleQuickSetting('wifi')">
+      <span>📶</span>
+      Wi-Fi
+    </button>
+
+    <button class="quick-tile" id="airplane-tile"
+      onclick="toggleQuickSetting('airplane')">
+      <span>✈️</span>
+      Airplane
+    </button>
+
+    <button class="quick-tile" id="dnd-tile"
+      onclick="toggleQuickSetting('dnd')">
+      <span>🌙</span>
+      Do Not Disturb
+    </button>
+
+    <button class="quick-tile active" id="theme-tile"
+      onclick="toggleTheme()">
+      <span>🌗</span>
+      Theme
+    </button>
+  </div>
+
+  <div class="brightness-card">
+    <div>☀️ Brightness</div>
+    <input type="range" min="10" max="100" value="100"
+      id="brightness-slider" oninput="setBrightness(this.value)">
+  </div>
+
+  <div class="notification-heading">
+    <strong>Notifications</strong>
+    <button onclick="clearNotifications()">Clear all</button>
+  </div>
+
+  <div id="notification-list"></div>
+
+  <div class="panel-footer">
+    <span>OTX OS 1.2</span>
+    <span id="battery-level">Battery: --</span>
+  </div>
+</div>
+
+
+<header>
+  <h1><span class="brand">OTX</span> OS</h1>
+  <button onclick="openApp('settings')">⚙️</button>
+</header>
+
+<main id="home">
+  <div class="card">
+    <div class="muted">Welcome to</div>
+    <h2 style="margin:7px 0">Your personal web OS</h2>
+    <div class="muted">A lightweight smartphone experience by OTXS</div>
+  </div>
+
+  <div class="apps">
+    <button class="app" onclick="openApp('phone')">
+      <span class="app-icon">📞</span><span class="app-name">Phone</span>
+    </button>
+    <button class="app" onclick="openApp('contacts')">
+      <span class="app-icon">👥</span><span class="app-name">Contacts</span>
+    </button>
+    <button class="app" onclick="openApp('calculator')">
+      <span class="app-icon">🧮</span><span class="app-name">Calculator</span>
+    </button>
+    <button class="app" onclick="openApp('notes')">
+      <span class="app-icon">📝</span><span class="app-name">Notes</span>
+    </button>
+    <button class="app" onclick="openApp('files')">
+      <span class="app-icon">📁</span><span class="app-name">Files</span>
+    </button>
+    <button class="app" onclick="openApp('browser')">
+      <span class="app-icon">🌐</span><span class="app-name">Browser</span>
+    </button>
+    <button class="app" onclick="openApp('camera')">
+      <span class="app-icon">📷</span><span class="app-name">Camera</span>
+    </button>
+    <button class="app" onclick="openApp('store')">
+      <span class="app-icon">🛍️</span><span class="app-name">App Store</span>
+    </button>
+    <button class="app" onclick="openApp('settings')">
+      <span class="app-icon">⚙️</span><span class="app-name">Settings</span>
+    </button>
+  </div>
+</main>
+
+<!-- PHONE -->
+<section class="screen" id="phone">
+  <div class="screen-header">
+    <button class="back" onclick="home()">←</button>
+    <h2>Phone</h2>
+  </div>
+
+  <input id="phone-number" class="dial-display"
+         type="tel" placeholder="Enter number">
+
+  <div class="dial-pad">
+    <button onclick="dialAdd('1')">1</button>
+    <button onclick="dialAdd('2')">2</button>
+    <button onclick="dialAdd('3')">3</button>
+    <button onclick="dialAdd('4')">4</button>
+    <button onclick="dialAdd('5')">5</button>
+    <button onclick="dialAdd('6')">6</button>
+    <button onclick="dialAdd('7')">7</button>
+    <button onclick="dialAdd('8')">8</button>
+    <button onclick="dialAdd('9')">9</button>
+    <button onclick="dialAdd('*')">*</button>
+    <button onclick="dialAdd('0')">0</button>
+    <button onclick="dialAdd('#')">#</button>
+  </div>
+
+  <div class="actions" style="max-width:340px;margin:15px auto">
+    <button onclick="dialBackspace()">⌫ Delete</button>
+    <button onclick="dialClear()">Clear</button>
+  </div>
+
+  <button class="call-button" onclick="makeCall()">📞</button>
+
+  <div class="section-title">Speed Dial</div>
+  <div id="phone-speed-dial"></div>
+
+  <div class="section-title">Recent Calls</div>
+  <div id="phone-recent"></div>
+</section>
+
+<!-- CONTACTS -->
+<section class="screen" id="contacts">
+  <div class="screen-header">
+    <button class="back" onclick="home()">←</button>
+    <h2>Contacts</h2>
+  </div>
+
+  <button class="primary full" onclick="showContactForm()">＋ Add Contact</button>
+
+  <input id="contact-search" placeholder="Search name or number..."
+         oninput="renderContacts()">
+
+  <div id="contact-form" class="card hidden">
+    <h3 id="contact-form-title">New Contact</h3>
+    <input id="contact-name" placeholder="Full name">
+    <input id="contact-phone" type="tel" placeholder="Phone number">
+    <input id="contact-email" type="email" placeholder="Email (optional)">
+    <select id="contact-speed">
+      <option value="">No Speed Dial</option>
+      <option value="1">Speed Dial 1</option>
+      <option value="2">Speed Dial 2</option>
+      <option value="3">Speed Dial 3</option>
+      <option value="4">Speed Dial 4</option>
+      <option value="5">Speed Dial 5</option>
+      <option value="6">Speed Dial 6</option>
+      <option value="7">Speed Dial 7</option>
+      <option value="8">Speed Dial 8</option>
+      <option value="9">Speed Dial 9</option>
+    </select>
+    <input id="contact-id" type="hidden">
+    <div class="actions">
+      <button class="primary" onclick="saveContact()">Save Contact</button>
+      <button onclick="hideContactForm()">Cancel</button>
+    </div>
+  </div>
+
+  <div id="contact-list"></div>
+
+  <div class="section-title">Backup & Restore</div>
+  <div class="card">
+    <p class="muted">Export your contacts or import a previously saved OTX OS contact backup.</p>
+    <div class="actions">
+      <button onclick="exportContacts()">Export JSON</button>
+      <button onclick="document.getElementById('import-file').click()">Import JSON</button>
+    </div>
+    <input id="import-file" type="file" accept=".json,application/json"
+           class="hidden" onchange="importContacts(event)">
+  </div>
+</section>
+
+<!-- CALL HISTORY -->
+<section class="screen" id="history">
+  <div class="screen-header">
+    <button class="back" onclick="home()">←</button>
+    <h2>Call History</h2>
+  </div>
+  <button class="danger full" onclick="clearHistory()">Clear Call History</button>
+  <div id="history-list"></div>
+</section>
+
+<!-- CALCULATOR -->
+<section class="screen" id="calculator">
+  <div class="screen-header">
+    <button class="back" onclick="home()">←</button>
+    <h2>Calculator</h2>
+  </div>
+  <input id="calc-display" placeholder="0" readonly style="font-size:27px;text-align:right">
+  <div class="dial-pad">
+    <button onclick="calcAdd('7')">7</button>
+    <button onclick="calcAdd('8')">8</button>
+    <button onclick="calcAdd('9')">9</button>
+    <button onclick="calcAdd('4')">4</button>
+    <button onclick="calcAdd('5')">5</button>
+    <button onclick="calcAdd('6')">6</button>
+    <button onclick="calcAdd('1')">1</button>
+    <button onclick="calcAdd('2')">2</button>
+    <button onclick="calcAdd('3')">3</button>
+    <button onclick="calcAdd('0')">0</button>
+    <button onclick="calcAdd('.')">.</button>
+    <button onclick="calcAdd('+')">+</button>
+    <button onclick="calcAdd('-')">−</button>
+    <button onclick="calcAdd('*')">×</button>
+    <button onclick="calcAdd('/')">÷</button>
+    <button onclick="calcClear()">C</button>
+    <button onclick="calcBack()">⌫</button>
+    <button class="primary" onclick="calculate()">=</button>
+  </div>
+</section>
+
+<!-- NOTES -->
+
+<section class="screen" id="notes">
+  <div class="screen-header">
+    <button class="back" onclick="home()">←</button>
+    <h2>Notes</h2>
+  </div>
+
+  <button class="primary full" onclick="createNote()">＋ New Note</button>
+
+  <div id="notes-list"></div>
+
+  <div id="note-editor" class="card hidden">
+    <input id="note-title" placeholder="Note title">
+    <textarea id="note-content" placeholder="Write your note here..."
+      oninput="saveCurrentNote()"></textarea>
+
+    <div class="actions">
+      <button class="primary" onclick="saveCurrentNote()">Save</button>
+      <button onclick="closeNoteEditor()">Back</button>
+      <button class="danger" onclick="deleteCurrentNote()">Delete</button>
+    </div>
+
+    <p class="muted" id="note-status">Not saved</p>
+  </div>
+</section>
+
+
+<!-- FILES -->
+<section class="screen" id="files">
+  <div class="screen-header">
+    <button class="back" onclick="home()">←</button>
+    <h2>Files</h2>
+  </div>
+  <div class="card">
+    <p>Select files from your device.</p>
+    <input type="file" multiple>
+  </div>
+</section>
+
+<!-- BROWSER -->
+<section class="screen" id="browser">
+  <div class="screen-header">
+    <button class="back" onclick="home()">←</button>
+    <h2>Browser</h2>
+  </div>
+  <input id="browser-url" placeholder="Enter website address">
+  <button class="primary full" onclick="browse()">Open Website</button>
+</section>
+
+<!-- CAMERA -->
+<section class="screen" id="camera">
+  <div class="screen-header">
+    <button class="back" onclick="home()">←</button>
+    <h2>Camera</h2>
+  </div>
+  <div class="card">
+    <p>Open your device camera or select an image.</p>
+    <input type="file" accept="image/*" capture="environment">
+  </div>
+</section>
+
+<!-- APP STORE -->
+<section class="screen" id="store">
+  <div class="screen-header">
+    <button class="back" onclick="home()">←</button>
+    <h2>OTXS App Store</h2>
+  </div>
+  <div class="card">
+    <h3>Discover Apps</h3>
+    <p class="muted">Explore applications available in the OTXS ecosystem.</p>
+    <button class="primary full" onclick="location.href='https://apps.otxs.de/'">
+      Open App Store
+    </button>
+  </div>
+</section>
+
+<!-- SETTINGS -->
+<section class="screen" id="settings">
+  <div class="screen-header">
+    <button class="back" onclick="home()">←</button>
+    <h2>Settings</h2>
+  </div>
+  <div class="card">
+    <h3>OTX OS</h3>
+    <p class="muted">Version 1.1 – Communication Suite</p>
+    <button class="full" onclick="toggleTheme()">Toggle Light / Dark Mode</button>
+    <button class="full" onclick="installApp()">Install OTX OS</button>
+  </div>
+  <div class="card">
+    <h3>Data</h3>
+    <p class="muted">Contacts, notes and call records are stored locally in this browser.</p>
+    <button class="danger full" onclick="clearAllData()">Reset OTX OS Data</button>
+  </div>
+  <div class="card">
+    <p class="muted">OTX OS is a web-based environment developed for OTXS.</p>
+    <a href="https://otxs.de" style="color:var(--accent)">Visit OTXS</a>
+  </div>
+</section>
+
+<nav>
+  <button onclick="home()"><span>⌂</span>Home</button>
+  <button onclick="openApp('phone')"><span>📞</span>Phone</button>
+  <button onclick="openApp('contacts')"><span>👥</span>Contacts</button>
+  <button onclick="openApp('history')"><span>🕘</span>History</button>
+</nav>
+
+<script>
+const STORAGE = {
+  contacts: 'otx-contacts',
+  calls: 'otx-recent-calls',
+  notes: 'otx-notes'
+};
+
+function getData(key) {
+  try {
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function openApp(id) {
+  document.getElementById('home').style.display = 'none';
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  if (id === 'contacts') renderContacts();
+  if (id === 'phone') renderPhone();
+  if (id === 'history') renderHistory();
+  if (id === 'notes') {
+   currentNoteId = null;
+   document.getElementById('note-editor').classList.add('hidden');
+   document.getElementById('notes-list').classList.remove('hidden');
+   renderNotes();
+  }
+}
+
+function home() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('home').style.display = 'block';
+}
+
+function updateClock() {
+  const now = new Date();
+
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+
+  document.getElementById('date').textContent =
+    now.toLocaleDateString([], {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+
+    updateNotificationClock();
+}
+
+updateClock();
+setInterval(updateClock, 1000);
+updateClock();
+setInterval(updateClock, 1000);
+
+// PHONE / DIALER
+function dialAdd(value) {
+  document.getElementById('phone-number').value += value;
+}
+
+function dialClear() {
+  document.getElementById('phone-number').value = '';
+}
+
+function dialBackspace() {
+  const input = document.getElementById('phone-number');
+  input.value = input.value.slice(0, -1);
+}
+
+function makeCall(number) {
+  const input = document.getElementById('phone-number');
+  number = (number || input.value).trim();
+
+  if (!/^[0-9+*#().\-\s]{3,25}$/.test(number)) {
+    alert('Please enter a valid phone number.');
+    return;
+  }
+
+  const calls = getData(STORAGE.calls);
+  calls.unshift({
+    number,
+    date: new Date().toISOString(),
+    type: 'outgoing'
+  });
+
+  localStorage.setItem(STORAGE.calls, JSON.stringify(calls.slice(0, 100)));
+  renderPhone();
+  window.location.href = 'tel:' + number;
+}
+
+function renderPhone() {
+  renderSpeedDial('phone-speed-dial');
+  renderRecent('phone-recent', 5);
+}
+
+// CONTACTS
+function showContactForm(contact) {
+  const form = document.getElementById('contact-form');
+  form.classList.remove('hidden');
+
+  document.getElementById('contact-form-title').textContent =
+    contact ? 'Edit Contact' : 'New Contact';
+
+  document.getElementById('contact-id').value = contact?.id || '';
+  document.getElementById('contact-name').value = contact?.name || '';
+  document.getElementById('contact-phone').value = contact?.phone || '';
+  document.getElementById('contact-email').value = contact?.email || '';
+  document.getElementById('contact-speed').value = contact?.speed || '';
+  form.scrollIntoView({behavior:'smooth'});
+}
+
+function hideContactForm() {
+  document.getElementById('contact-form').classList.add('hidden');
+}
+
+function saveContact() {
+  const name = document.getElementById('contact-name').value.trim();
+  const phone = document.getElementById('contact-phone').value.trim();
+  const email = document.getElementById('contact-email').value.trim();
+  const speed = document.getElementById('contact-speed').value;
+  const id = document.getElementById('contact-id').value;
+
+  if (!name || !phone) {
+    alert('Name and phone number are required.');
+    return;
+  }
+
+  if (!/^[0-9+*#().\-\s]{3,25}$/.test(phone)) {
+    alert('Please enter a valid phone number.');
+    return;
+  }
+
+  const contacts = getData(STORAGE.contacts);
+
+  // A speed-dial number can belong to only one contact.
+  if (speed) {
+    const existing = contacts.find(c => c.speed === speed && c.id !== id);
+    if (existing) {
+      alert('Speed Dial ' + speed + ' is already assigned to ' + existing.name + '.');
+      return;
+    }
+  }
+
+  const contact = {
+    id: id || (Date.now().toString() + Math.random().toString(16).slice(2)),
+    name, phone, email, speed
+  };
+
+  const index = contacts.findIndex(c => c.id === id);
+  if (index >= 0) contacts[index] = contact;
+  else contacts.push(contact);
+
+  localStorage.setItem(STORAGE.contacts, JSON.stringify(contacts));
+  hideContactForm();
+  renderContacts();
+  renderPhone();
+}
+
+function renderContacts() {
+  const list = document.getElementById('contact-list');
+  const search = (document.getElementById('contact-search')?.value || '').toLowerCase();
+  const contacts = getData(STORAGE.contacts)
+    .filter(c => c.name.toLowerCase().includes(search) || c.phone.includes(search))
+    .sort((a,b) => a.name.localeCompare(b.name));
+
+  list.replaceChildren();
+
+  if (!contacts.length) {
+    list.innerHTML = '<div class="empty">No contacts found.</div>';
+    return;
+  }
+
+  contacts.forEach(contact => {
+    const item = document.createElement('div');
+    item.className = 'list-item';
+
+    const name = document.createElement('strong');
+    name.textContent = contact.name;
+
+    const phone = document.createElement('div');
+    phone.textContent = '📞 ' + contact.phone;
+
+    const email = document.createElement('div');
+    email.className = 'muted';
+    email.textContent = contact.email || '';
+
+    const speed = document.createElement('div');
+    speed.className = 'muted';
+    speed.textContent = contact.speed ? 'Speed Dial ' + contact.speed : '';
+
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+
+    const call = document.createElement('button');
+    call.textContent = '📞 Call';
+    call.onclick = () => makeCall(contact.phone);
+
+    const edit = document.createElement('button');
+    edit.textContent = 'Edit';
+    edit.onclick = () => showContactForm(contact);
+
+    const remove = document.createElement('button');
+    remove.textContent = 'Delete';
+    remove.onclick = () => deleteContact(contact.id);
+
+    actions.append(call, edit, remove);
+    item.append(name, phone, email, speed, actions);
+    list.appendChild(item);
+  });
+}
+
+function deleteContact(id) {
+  if (!confirm('Delete this contact?')) return;
+
+  const contacts = getData(STORAGE.contacts).filter(c => c.id !== id);
+  localStorage.setItem(STORAGE.contacts, JSON.stringify(contacts));
+  renderContacts();
+  renderPhone();
+}
+
+// SPEED DIAL
+function renderSpeedDial(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.replaceChildren();
+  const contacts = getData(STORAGE.contacts)
+    .filter(c => c.speed)
+    .sort((a,b) => Number(a.speed) - Number(b.speed));
+
+  if (!contacts.length) {
+    container.innerHTML = '<div class="empty">Assign Speed Dial numbers in Contacts.</div>';
+    return;
+  }
+
+  contacts.forEach(contact => {
+    const button = document.createElement('button');
+    button.className = 'list-item full';
+    button.textContent = contact.speed + ' · ' + contact.name + ' — ' + contact.phone;
+    button.onclick = () => makeCall(contact.phone);
+    container.appendChild(button);
+  });
+}
+
+// CALL HISTORY
+function renderRecent(containerId, limit) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.replaceChildren();
+  const calls = getData(STORAGE.calls).slice(0, limit);
+
+  if (!calls.length) {
+    container.innerHTML = '<div class="empty">No call records yet.</div>';
+    return;
+  }
+
+  calls.forEach(call => {
+    const item = document.createElement('div');
+    item.className = 'list-item';
+
+    const number = document.createElement('strong');
+    number.textContent = '📞 ' + call.number;
+
+    const date = document.createElement('div');
+    date.className = 'muted';
+    date.textContent = new Date(call.date).toLocaleString();
+
+    const button = document.createElement('button');
+    button.textContent = 'Call Again';
+    button.className = 'full';
+    button.onclick = () => makeCall(call.number);
+
+    item.append(number, date, button);
+    container.appendChild(item);
+  });
+}
+
+function renderHistory() {
+  renderRecent('history-list', 100);
+}
+
+function clearHistory() {
+  if (!confirm('Clear all OTX OS call records?')) return;
+  localStorage.removeItem(STORAGE.calls);
+  renderHistory();
+  renderPhone();
+}
+
+function exportContacts() {
+  const contacts = getData(STORAGE.contacts);
+  const blob = new Blob([JSON.stringify(contacts, null, 2)], {
+    type:'application/json'
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'otx-os-contacts.json';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function importContacts(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    try {
+      const imported = JSON.parse(reader.result);
+
+      if (!Array.isArray(imported)) throw new Error('Invalid format');
+
+      const valid = imported.filter(c =>
+        c && typeof c.name === 'string' &&
+        typeof c.phone === 'string'
+      );
+
+      const existing = getData(STORAGE.contacts);
+      const merged = [...existing];
+
+      valid.forEach(c => {
+        merged.push({
+          id: Date.now().toString() + Math.random().toString(16).slice(2),
+          name: c.name,
+          phone: c.phone,
+          email: c.email || '',
+          speed: ''
+        });
+      });
+
+      localStorage.setItem(STORAGE.contacts, JSON.stringify(merged));
+      renderContacts();
+      renderPhone();
+      alert(valid.length + ' contacts imported.');
+    } catch {
+      alert('Could not import this file. Please select a valid OTX OS contacts JSON file.');
+    }
+    event.target.value = '';
+  };
+
+  reader.readAsText(file);
+}
+
+// CALCULATOR
+function calcAdd(value) {
+  document.getElementById('calc-display').value += value;
+}
+function calcClear() {
+  document.getElementById('calc-display').value = '';
+}
+function calcBack() {
+  const input = document.getElementById('calc-display');
+  input.value = input.value.slice(0,-1);
+}
+function calculate() {
+  const input = document.getElementById('calc-display');
+  const expression = input.value;
+
+  if (!/^[0-9+\-*/().\s]+$/.test(expression)) {
+    input.value = 'Invalid';
+    return;
+  }
+
+  try {
+    const result = Function('"use strict"; return (' + expression + ')')();
+    input.value = Number.isFinite(result) ? String(result) : 'Error';
+  } catch {
+    input.value = 'Error';
+  }
+}
+
+
+const NOTES_KEY = 'otx-notes-list';
+let currentNoteId = null;
+
+function getNotes() {
+  try {
+    return JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function storeNotes(notes) {
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+}
+
+function renderNotes() {
+  const container = document.getElementById('notes-list');
+  container.replaceChildren();
+
+  const notes = getNotes().sort((a, b) => b.updated - a.updated);
+
+  if (!notes.length) {
+    container.innerHTML = '<div class="empty">No notes yet. Create your first note.</div>';
+    return;
+  }
+
+  notes.forEach(note => {
+    const item = document.createElement('div');
+    item.className = 'list-item';
+
+    const title = document.createElement('strong');
+    title.textContent = note.title || 'Untitled Note';
+
+    const preview = document.createElement('div');
+    preview.className = 'muted';
+    preview.textContent = note.content || 'Empty note';
+
+    const date = document.createElement('div');
+    date.className = 'muted';
+    date.textContent = new Date(note.updated).toLocaleString();
+
+    item.append(title, preview, date);
+    item.onclick = () => openNote(note.id);
+
+    container.appendChild(item);
+  });
+}
+
+function createNote() {
+  const note = {
+    id: Date.now().toString(),
+    title: '',
+    content: '',
+    updated: Date.now()
+  };
+
+  const notes = getNotes();
+  notes.push(note);
+  storeNotes(notes);
+
+  openNote(note.id);
+}
+
+function openNote(id) {
+  const note = getNotes().find(n => n.id === id);
+  if (!note) return;
+
+  currentNoteId = id;
+
+  document.getElementById('note-title').value = note.title;
+  document.getElementById('note-content').value = note.content;
+
+  document.getElementById('notes-list').classList.add('hidden');
+  document.getElementById('note-editor').classList.remove('hidden');
+  document.getElementById('note-status').textContent = 'Saved';
+}
+
+function saveCurrentNote() {
+  if (!currentNoteId) return;
+
+  const notes = getNotes();
+  const note = notes.find(n => n.id === currentNoteId);
+  if (!note) return;
+
+  note.title = document.getElementById('note-title').value;
+  note.content = document.getElementById('note-content').value;
+  note.updated = Date.now();
+
+  storeNotes(notes);
+  document.getElementById('note-status').textContent = 'Saved';
+}
+
+function closeNoteEditor() {
+  saveCurrentNote();
+  currentNoteId = null;
+
+  document.getElementById('note-editor').classList.add('hidden');
+  document.getElementById('notes-list').classList.remove('hidden');
+
+  renderNotes();
+}
+
+function deleteCurrentNote() {
+  if (!currentNoteId || !confirm('Delete this note?')) return;
+
+  const notes = getNotes().filter(n => n.id !== currentNoteId);
+  storeNotes(notes);
+
+  currentNoteId = null;
+  document.getElementById('note-editor').classList.add('hidden');
+  document.getElementById('notes-list').classList.remove('hidden');
+
+  renderNotes();
+}
+
+
+
+
+// BROWSER
+function browse() {
+  let url = document.getElementById('browser-url').value.trim();
+  if (!url) return;
+
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  try {
+    const parsed = new URL(url);
+    if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error();
+    window.open(parsed.href, '_blank', 'noopener');
+  } catch {
+    alert('Please enter a valid website address.');
+  }
+}
+
+// SETTINGS
+function toggleTheme() {
+  const light = getComputedStyle(document.documentElement)
+    .getPropertyValue('--bg').trim() === '#101321';
+
+  if (light) {
+    document.documentElement.style.setProperty('--bg', '#f3f4f8');
+    document.documentElement.style.setProperty('--panel', '#ffffff');
+    document.documentElement.style.setProperty('--card', '#e4e7ef');
+    document.documentElement.style.setProperty('--text', '#151827');
+    document.documentElement.style.setProperty('--muted', '#62697b');
+    document.documentElement.style.setProperty('--border', '#cbd0dc');
+  } else {
+    document.documentElement.style.setProperty('--bg', '#101321');
+    document.documentElement.style.setProperty('--panel', '#1b2032');
+    document.documentElement.style.setProperty('--card', '#252c40');
+    document.documentElement.style.setProperty('--text', '#ffffff');
+    document.documentElement.style.setProperty('--muted', '#aab1c5');
+    document.documentElement.style.setProperty('--border', '#353d54');
+  }
+}
+
+function clearAllData() {
+  if (!confirm('This will delete contacts, notes and call records. Continue?')) return;
+
+  Object.values(STORAGE).forEach(key => localStorage.removeItem(key));
+  alert('OTX OS data cleared.');
+  home();
+}
+
+// PWA INSTALLATION
+let installPrompt = null;
+
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  installPrompt = event;
+});
+
+async function installApp() {
+  if (!installPrompt) {
+    alert('If installation is supported, use your browser menu and select "Install app" or "Add to Home Screen".');
+    return;
+  }
+
+  installPrompt.prompt();
+  await installPrompt.userChoice;
+  installPrompt = null;
+}
+
+// SERVICE WORKER
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .catch(error => console.error('Service Worker error:', error));
+  });
+}
+
+
+
+// OTX OS NOTIFICATION CENTRE
+
+const notificationPanel = document.getElementById('notification-panel');
+
+let quickSettings = {
+  wifi: true,
+  airplane: false,
+  dnd: false
+};
+
+let notifications = [
+  {
+    title: 'Welcome to OTX OS 1.2',
+    message: 'Your notification centre is ready.',
+    time: new Date().toLocaleTimeString()
+  }
+];
+
+function openNotifications() {
+  notificationPanel.classList.add('open');
+  updateNotificationClock();
+  renderNotifications();
+}
+
+function closeNotifications() {
+  notificationPanel.classList.remove('open');
+}
+
+function updateNotificationClock() {
+  const now = new Date();
+
+  document.getElementById('panel-time').textContent =
+    now.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+
+  document.getElementById('panel-date').textContent =
+    now.toLocaleDateString([], {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+}
+
+function toggleQuickSetting(setting) {
+  quickSettings[setting] = !quickSettings[setting];
+
+  // Airplane mode disables the simulated Wi-Fi tile.
+  if (setting === 'airplane' && quickSettings.airplane) {
+    quickSettings.wifi = false;
+  }
+
+  renderQuickSettings();
+}
+
+function renderQuickSettings() {
+  Object.keys(quickSettings).forEach(setting => {
+    const tile = document.getElementById(setting + '-tile');
+    if (tile) {
+      tile.classList.toggle('active', quickSettings[setting]);
+    }
+  });
+
+  document.getElementById('theme-tile').classList.toggle(
+    'active',
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--bg').trim() !== '#f3f4f8'
+  );
+}
+
+function setBrightness(value) {
+  document.documentElement.style.setProperty(
+    '--screen-brightness',
+    value / 100
+  );
+  document.body.style.filter = `brightness(${value / 100})`;
+}
+
+function addNotification(title, message) {
+  if (quickSettings.dnd) return;
+
+  notifications.unshift({
+    title,
+    message,
+    time: new Date().toLocaleTimeString()
+  });
+
+  notifications = notifications.slice(0, 30);
+  renderNotifications();
+}
+
+function renderNotifications() {
+  const container = document.getElementById('notification-list');
+  container.replaceChildren();
+
+  if (!notifications.length) {
+    container.innerHTML =
+      '<div class="empty">No notifications</div>';
+    return;
+  }
+
+  notifications.forEach(notification => {
+    const item = document.createElement('div');
+    item.className = 'notification-item';
+
+    const title = document.createElement('strong');
+    title.textContent = notification.title;
+
+    const message = document.createElement('div');
+    message.textContent = notification.message;
+
+    const time = document.createElement('small');
+    time.textContent = notification.time;
+
+    item.append(title, message, time);
+    container.appendChild(item);
+  });
+}
+
+function clearNotifications() {
+  notifications = [];
+  renderNotifications();
+}
+
+// Battery information, when supported by the browser.
+async function updateBattery() {
+  if (!navigator.getBattery) {
+    document.getElementById('battery-level').textContent =
+      'Battery: unavailable';
+    return;
+  }
+
+  try {
+    const battery = await navigator.getBattery();
+
+    function showBattery() {
+      document.getElementById('battery-level').textContent =
+        'Battery: ' + Math.round(battery.level * 100) + '%' +
+        (battery.charging ? ' ⚡' : '');
+    }
+
+    showBattery();
+    battery.addEventListener('levelchange', showBattery);
+    battery.addEventListener('chargingchange', showBattery);
+  } catch {
+    document.getElementById('battery-level').textContent =
+      'Battery: unavailable';
+  }
+}
+
+updateBattery();
+updateNotificationClock();
+renderQuickSettings();
+
+// Swipe gestures from the top edge.
+let touchStartY = 0;
+let touchStartX = 0;
+
+document.addEventListener('touchstart', event => {
+  touchStartY = event.touches[0].clientY;
+  touchStartX = event.touches[0].clientX;
+}, {passive: true});
+
+document.addEventListener('touchend', event => {
+  const endY = event.changedTouches[0].clientY;
+  const endX = event.changedTouches[0].clientX;
+  const difference = endY - touchStartY;
+
+  if (touchStartY < 45 && difference > 80 &&
+      Math.abs(endX - touchStartX) < 100) {
+    openNotifications();
+  }
+
+  if (notificationPanel.classList.contains('open') &&
+      difference < -80) {
+    closeNotifications();
+  }
+}, {passive: true});
+
+// Close with Escape.
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeNotifications();
+});
+
+</script>
+
+</body>
+</html>
+
